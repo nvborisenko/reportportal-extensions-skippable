@@ -1,0 +1,17 @@
+﻿image: Visual Studio 2019
+
+install:
+  - gitversion /l console /output buildserver
+
+configuration:
+  - Release
+
+dotnet_csproj:
+  patch: true
+  version: '$(GitVersion_SemVer)'
+
+build_script:
+  - dotnet pack
+
+after_build:
+  - appveyor PushArtifact src\ReportPortal.Extensions.Skippable\bin\%configuration%\ReportPortal.Extensions.Skippable.%GitVersion_SemVer%.nupkg
