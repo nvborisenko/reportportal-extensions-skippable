@@ -13,12 +13,15 @@ namespace ReportPortal.Extensions.Skippable
 
         private void ReportEventsSource_OnBeforeTestFinishing(Shared.Reporter.ITestReporter testReporter, Shared.Extensibility.ReportEvents.EventArgs.BeforeTestFinishingEventArgs args)
         {
-            if (args.FinishTestItemRequest.Status == Status.Skipped)
+            if (args.FinishTestItemRequest?.Status == Status.Skipped)
             {
-                args.FinishTestItemRequest.Issue = new Client.Abstractions.Responses.Issue
+                if (args.FinishTestItemRequest.Issue == null)
                 {
-                    Type = WellKnownIssueType.NotDefect
-                };
+                    args.FinishTestItemRequest.Issue = new Client.Abstractions.Responses.Issue
+                    {
+                        Type = WellKnownIssueType.NotDefect
+                    };
+                }
             }
         }
     }
