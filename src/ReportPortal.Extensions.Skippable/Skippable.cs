@@ -1,10 +1,10 @@
 ﻿using ReportPortal.Client.Abstractions.Models;
 using ReportPortal.Client.Abstractions.Requests;
-using ReportPortal.Extensions.Skippable.Extensions;
 using ReportPortal.Shared.Extensibility;
 using ReportPortal.Shared.Extensibility.ReportEvents;
 using ReportPortal.Shared.Extensibility.ReportEvents.EventArgs;
 using ReportPortal.Shared.Reporter;
+using System;
 using System.Linq;
 
 namespace ReportPortal.Extensions.Skippable
@@ -19,7 +19,7 @@ namespace ReportPortal.Extensions.Skippable
 
         private void ReportEventsSource_OnBeforeLogsSending(ILogsReporter logsReporter, BeforeLogsSendingEventArgs args)
         {
-            var skippableMimeTypes = args.Configuration.GetSkippableMimeTypes();
+            var skippableMimeTypes = args.Configuration.GetValues("Extensions:Skippable:MimeTypes", new string[0]);
 
             if (!skippableMimeTypes.Any())
             {
@@ -28,7 +28,7 @@ namespace ReportPortal.Extensions.Skippable
 
             foreach (var request in args.CreateLogItemRequests.Where(request => request.Attach != null))
             {
-                if (skippableMimeTypes.Contains(request.Attach.MimeType))
+                if (skippableMimeTypes.Contains(request.Attach.MimeType, StringComparer.OrdinalIgnoreCase))
                 {
                     IgnoreAttachment(request);
                 }
@@ -54,7 +54,17 @@ namespace ReportPortal.Extensions.Skippable
             var mimetype = request.Attach.MimeType;
             var size = request.Attach.Data?.Length;
 
-            request.Text += $"\nAn attachment with size = {size} byte(s) and '{mimetype}' MIME type was removed.";
+            var notice = $"> An attachment with {size} byte(s) and {mimetype} MIME type was removed";
+
+            if (string.IsNullOrEmpty(request.Text))
+            {
+                request.Text = notice;
+            }
+            else
+            {
+                request.Text += $"\n\n{notice}";
+            }
+
             request.Attach = null;
         }
     }
