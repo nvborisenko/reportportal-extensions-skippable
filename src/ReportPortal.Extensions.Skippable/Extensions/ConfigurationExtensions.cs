@@ -1,16 +1,17 @@
 ﻿using ReportPortal.Shared.Configuration;
+using System;
+using System.Linq;
 
 namespace ReportPortal.Extensions.Skippable.Extensions
 {
     internal static class ConfigurationExtensions
     {
-        private const char ArrayItemsDelimiter = ';';
+        private static string[] EmptyStringArray { get; } = new string[0]; 
 
         public static string[] GetSkippableMimeTypes(this IConfiguration configuration)
         {
             return configuration
-                .GetValue("Extensions:Skippable:MimeTypes", string.Empty)
-                .Split(ArrayItemsDelimiter);
+                .GetValues("Extensions:Skippable:MimeTypes", EmptyStringArray)?.ToArray() ?? EmptyStringArray;
         }
     }
 }
