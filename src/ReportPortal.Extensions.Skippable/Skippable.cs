@@ -1,4 +1,5 @@
 ﻿using ReportPortal.Client.Abstractions.Models;
+using ReportPortal.Client.Abstractions.Requests;
 using ReportPortal.Extensions.Skippable.Extensions;
 using ReportPortal.Shared.Extensibility;
 using ReportPortal.Shared.Extensibility.ReportEvents;
@@ -29,7 +30,7 @@ namespace ReportPortal.Extensions.Skippable
             {
                 if (skippableMimeTypes.Contains(request.Attach.MimeType))
                 {
-                    request.Attach = null;
+                    IgnoreAttachment(request);
                 }
             }
         }
@@ -46,6 +47,15 @@ namespace ReportPortal.Extensions.Skippable
                     };
                 }
             }
+        }
+
+        private static void IgnoreAttachment(CreateLogItemRequest request)
+        {
+            var mimetype = request.Attach.MimeType;
+            var size = request.Attach.Data?.Length;
+
+            request.Text += $"\nAn attachment with size = {size} byte(s) and '{mimetype}' MIME type was removed.";
+            request.Attach = null;
         }
     }
 }
