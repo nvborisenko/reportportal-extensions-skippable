@@ -19,18 +19,16 @@ namespace ReportPortal.Extensions.Skippable
 
         private void ReportEventsSource_OnBeforeLogsSending(ILogsReporter logsReporter, BeforeLogsSendingEventArgs args)
         {
-            var skippableMimeTypes = args.Configuration.GetValues("Extensions:Skippable:MimeTypes", new string[0]);
+            var skippableMimeTypes = args.Configuration.GetValues<string>("Extensions:Skippable:MimeTypes", null);
 
-            if (!skippableMimeTypes.Any())
+            if (skippableMimeTypes != null)
             {
-                return;
-            }
-
-            foreach (var request in args.CreateLogItemRequests.Where(request => request.Attach != null))
-            {
-                if (skippableMimeTypes.Contains(request.Attach.MimeType, StringComparer.OrdinalIgnoreCase))
+                foreach (var request in args.CreateLogItemRequests.Where(request => request.Attach != null))
                 {
-                    IgnoreAttachment(request);
+                    if (skippableMimeTypes.Contains(request.Attach.MimeType, StringComparer.OrdinalIgnoreCase))
+                    {
+                        IgnoreAttachment(request);
+                    }
                 }
             }
         }
